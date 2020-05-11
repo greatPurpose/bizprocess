@@ -1,0 +1,122 @@
+﻿@{
+    ViewBag.Title = "Login";
+    Page.BodyStyle = "style='background-color:#1c77ac; background-image:url(images/custom/light.png); background-repeat:no-repeat; background-position:center top; overflow:hidden;'";
+    Page.CheckApp = false;
+}
+@section CSS
+{
+    <link href="~/Content/Theme/@BizProcess.Utility.Config.Theme/Style/custom.css" id="style_custom" rel="stylesheet" type="text/css" media="screen" />
+}
+@section JavaScript
+{
+    <script type="text/javascript" src="@Url.Content("~/Scripts/cloud.js")"></script>
+}
+<div id="mainBody">
+    <div id="cloud1" class="cloud"></div>
+    <div id="cloud2" class="cloud"></div>
+</div>
+
+<div class="logintop">
+    <span>欢迎登录后台管理界面平台</span>
+    <ul>
+        <li><a href="#">回首页</a></li>
+        <li><a href="#">帮助</a></li>
+        <li><a href="#">关于</a></li>
+    </ul>
+</div>
+
+<div class="loginbody">
+
+    <span class="systemlogo"></span>
+
+    <form method="post" id="form1">
+        <div class="loginbox">
+
+            <ul>
+                <li><input type="text" class="loginuser" id="Account" name="Account" maxlength="50" placeholder="Username" /></li>
+                <li><input type="password" class="loginpwd" id="Password" name="Password" maxlength="50" placeholder="Password" /></li>
+                <!--
+                <li>
+                    <input type="text" class="mytext" id="VCode" name="VCode" maxlength="4" />
+                    <br />
+                    <img alt="" src="VCode?@DateTime.Now.Ticks" onclick="cngimg();" style="vertical-align:middle;" id="VcodeImg" />
+                    
+                </li>
+                    -->
+                <li><input type="submit" class="loginbtn" value="登录" onclick="return submitForm();" /></li>
+            </ul>
+
+
+        </div>
+
+    </form>
+
+</div>
+
+<div class="loginbm">版权所有  2015  <a href="#">xxx.com</a>  自定义</div>
+
+<script type="text/javascript">
+    /*
+    var isVcode = '1' == '@Session[ViewBag.IsVcodeSessionKey]';
+    var isSessionLost = "1" == '@Request.QueryString["session"]';
+    */
+    $(window).load(function () {
+        /*
+        if (isVcode) {
+            if (!isSessionLost) {
+                top.win.resize(300, 250);
+            }
+            $("#novcode").show();
+        }
+        */
+        @Html.Raw(ViewBag.ErrMsg)
+        @Html.Raw(ViewBag.Forcescript)
+
+        $('.loginbox').css({ 'position': 'absolute', 'left': ($(window).width() - 692) / 2 });
+        $(window).resize(function () {
+            $('.loginbox').css({ 'position': 'absolute', 'left': ($(window).width() - 692) / 2 });
+        })
+
+        $('#Account').focus();
+    });
+    function submitForm() {
+        if (checkForm()){
+            var data = {};
+            $("#form1").serializeArray().map(function(x){data[x.name] = x.value;}); 
+
+            $.ajax({
+                url: '/Login/Login',
+                method: 'post',
+                data: data,
+                success: function(a){
+                    eval(a);
+                }
+            });
+        }
+        return false;
+    }
+    function checkForm() {
+        var form1 = document.forms[0];
+        if ($.trim(form1.Account.value).length == 0) {
+            alert("帐号不能为空!");
+            form1.Account.focus();
+            return false;
+        }
+        if ($.trim(form1.Password.value).length == 0) {
+            alert("密码不能为空!");
+            form1.Password.focus();
+            return false;
+        }
+        /*
+        if (isVcode && form1.VCode && $.trim(form1.VCode.value).length == 0) {
+            alert("验证码不能为空!");
+            form1.VCode.focus();
+            return false;
+        }
+        */
+        return true;
+    }
+    function cngimg() {
+        $('#VcodeImg').attr('src', 'VCode?' + new Date().toString());
+    }
+</script>

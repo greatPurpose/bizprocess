@@ -1,0 +1,91 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+@model IEnumerable<BizProcess.Data.Model.DBExtract>
+
+<form method="post">
+<div class="toolbar" style="margin-top:0; border-top:0;">
+    <a href="javascript:void(0);" onclick="add();return false;"><span style="background-image:url(@Url.Content("~/Images/ico/folder_classic_stuffed_add.png"));">添加</span></a>
+    <span class="toolbarsplit">&nbsp;</span>
+    <input type="submit" style="display:none;" value="d" id="DeleteBut" name="DeleteBut" />
+    <a href="javascript:void(0);" onclick="del();return false;"><span style="background-image:url(@Url.Content("~/Images/ico/folder_classic_stuffed_remove.png"));">删除所选</span></a>
+</div>
+<table class="mygrid">
+    <thead>
+        <tr>
+            <th width="3%" sort="0"><input type="checkbox" onclick="checkAll(this.checked);" style="vertical-align:middle;" /></th>
+            <th width="30%">表名称</th>
+            <th width="30%">备注</th>
+            <th width="12%">抽取类型</th>
+            <th width="15%" sort="0">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var dbe in Model)
+    {
+        <tr>
+            <td><input type="checkbox" value="@dbe.ID" name="checkbox_app" /></td>
+            <td>@dbe.Name</td>
+            <td>@dbe.Comment</td>
+            <td style="word-break:break-all;word-wrap:break-word;">@(dbe.ExtractType ? "自动抽取" : "手动抽取")</td>
+            <td>
+                <a class="editlink" href="javascript:edit('@dbe.ID');">编辑</a>
+                <a class="transferlink" href="javascript:transfer('@dbe.ID');">抽取</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+<script type="text/javascript">
+    var appid = '@Request.QueryString["appid"]';
+    var iframeid = '@Request.QueryString["tabid"]';
+    var dialog = top.mainDialog;
+    $(function ()
+    {
+        var dataGrid = new BPUI.Grid({ table: $(".mygrid"), showpager: false });
+    });
+    function add()
+    {
+        dialog.open({ id: "window_" + appid.replaceAll('-', ''), title: "添加抽取", width: 700, height: 320, url: top.rootdir + '/DBExtract/Edit?isadd=1' + '@ViewBag.Query1', openerid: iframeid });
+    }
+    function edit(id)
+    {
+        dialog.open({ id: "window_" + appid.replaceAll('-', ''), title: "编辑抽取", width: 700, height: 320, url: top.rootdir + '/DBExtract/Edit?id=' + id + '@ViewBag.Query1', openerid: iframeid });
+    }
+    function transfer(id)
+    {
+        dg = "<div id='wait-dialog'>Please wait for being transfered...</div>";
+        $("body").append(dg);
+        $("#wait-dialog").css("top", '30%').css("left", '30%');
+
+        $.ajax({
+            url: "../DBExtract/Transfer?id=" + id,
+            cache: !1,
+            success: function (a) {
+                alert(a);
+            },
+            complete: function () {
+                $("#wait-dialog").remove();
+            }
+        })
+    }
+    function checkAll(checked)
+    {
+        $("input[name='checkbox_app']").prop("checked", checked);
+    }
+    function del()
+    {
+        if ($(":checked[name='checkbox_app']").size() == 0)
+        {
+            alert("您没有抽取要删除的项!");
+            return false;
+        }
+        if (!confirm('您真的要删除所选抽取吗?'))
+        {
+            return false;
+        }
+        $("#DeleteBut").click();
+        return true;
+    }
+</script>
+</form>

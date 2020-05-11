@@ -1,0 +1,103 @@
+﻿@{
+    ViewBag.Title = "Set_DivFlow";
+    string lineID = Request.QueryString["id"];
+    string fromID = Request.QueryString["from"];
+    string toID = Request.QueryString["to"];
+}
+<form method="post">
+    <div style="height:8px;"></div>
+    <table cellpadding="0" cellspacing="1" border="0" width="99%" class="formtable">
+        <tr>
+            <div>
+                <input type="radio" value="radio_dsstring" name="radio_ds" style="vertical-align:left;" id="radio_ds3" /><label style="vertical-align:middle;" for="radio_ds3">(数据源表达式):</label>
+            </div>
+        </tr>
+        <div>
+            <tr>
+                <div>
+                    &nbsp;&nbsp;是否归档&nbsp;&nbsp;
+                    <input type="text" name="Name" id="Name" class="mytext" validate="empty" style="width: 30%" />
+
+                    &nbsp;&nbsp;是否归档&nbsp;&nbsp;
+                    <input type="text" name="Name" id="Name1" class="mytext" validate="empty" style="width: 30%" />
+                </div>
+            </tr>
+            </div>
+                <tr>
+                    <div>
+                        <input type="radio" value="radio_dsstring" name="radio_ds" style="vertical-align:left;" id="radio_ds3" /><label style="vertical-align:middle;" for="radio_ds3">(数据源表达式):</label>
+                    </div>
+                </tr>
+                <tr>
+                    <div>
+
+                        &nbsp;&nbsp; 是否归档&nbsp;&nbsp;
+                        <input type="text" name="Name" id="Name2" class="mytext" validate="empty" style="width: 30%" />
+
+                    </div>
+                    <div>
+
+                        &nbsp;&nbsp; 是否归档&nbsp;&nbsp;
+                        <input type="text" name="Name" id="Name2" class="mytext" validate="empty" style="width: 30%" />
+
+                        &nbsp;&nbsp;是否归档&nbsp;&nbsp;
+                        <input type="text" name="Name" id="Name3" class="mytext" validate="empty" style="width: 30%" />
+                    </div>
+                </tr>
+                <tr>
+                    <div>
+                        <input type="radio" value="radio_dsstring" name="radio_ds" style="vertical-align:left;" id="radio_ds3" /><label style="vertical-align:middle;" for="radio_ds3">(数据源表达式):</label>
+                    </div>
+                </tr>
+                <tr>
+                    <div>
+
+                        &nbsp;&nbsp; 是否归档&nbsp;&nbsp;
+                        <input type="text" name="Name" id="Name2" class="mytext" validate="empty" style="width: 30%" />
+
+                    </div>
+                    <div>
+                        &nbsp;&nbsp;是否归档&nbsp;&nbsp;
+                        <input type="text" name="Name" id="Name4" class="mytext" validate="empty" style="width: 30%" />
+
+                        &nbsp;&nbsp;是否归档&nbsp;&nbsp;
+                        <input type="text" name="Name" id="Name5" class="mytext" validate="empty" style="width: 30%" />
+                    </div>
+                </tr>
+                <div>
+                    <tr>
+                        <td colspan="4"> 说明： </th>
+                    </tr>
+                </div>
+                <tr>
+                    <td colspan="4"><textarea id="base_Note" class="mytext" style="width:100%; height:50px;"></textarea></td>
+                </tr>
+</table>
+
+        <div id="div_event" title="&nbsp;&nbsp;事件&nbsp;&nbsp;">
+            <div style="height:8px;"></div>
+            </div>
+        </div>
+        <div style="width:100%; margin:10px auto 10px auto; text-align:center;">
+            <input type="button" class="mybutton" value=" 确 定 " onclick="confirm1();" />
+            <input type="button" class="mybutton" value=" 取 消 " onclick="new BPUI.Window().close();" />
+        </div>
+
+
+</form>
+
+<script type="text/javascript">
+
+    $(function ()
+    {
+
+    });
+
+    function confirm1()
+    {
+
+        new BPUI.Window().close();
+    }
+
+
+</script>

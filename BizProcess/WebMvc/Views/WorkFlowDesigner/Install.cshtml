@@ -1,0 +1,8 @@
+﻿@{
+    Layout = null;
+    
+    string json = Request.Form["json"];
+    string msg = new BizProcess.Platform.WorkFlow().InstallFlow(json);
+    BizProcess.Platform.Log.Add("安装了流程", json + "(" + msg + ")", BizProcess.Platform.Log.Types.流程相关);
+    Response.Write(msg);
+}

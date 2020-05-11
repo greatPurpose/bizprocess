@@ -1,0 +1,255 @@
+﻿@{
+    ViewBag.Title = "Edit";
+    BizProcess.Platform.DBConnection bdbConn = new BizProcess.Platform.DBConnection();
+    string link_DBConnOptions = bdbConn.GetAllOptions(Model.DBConnID.ToString());
+}
+@model BizProcess.Data.Model.DBExtract 
+<form method="post" onsubmit="return new BPUI.Validate().validateForm(this);">
+    @Html.AntiForgeryToken()
+    <div id="tabdiv">
+        <div id="div_base" title="基本信息">
+            <div style="height:8px;"></div>
+            <table cellpadding="0" cellspacing="1" border="0" width="99%" class="formtable">
+                <tr>
+                    <th style="width: 120px;">
+                        表名称(英文)：
+                    </th>
+                    <td>
+                        <input type="text" name="Name" id="Name" class="mytext" value="@Model.Name" validate="empty" style="width: 75%" />
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        表名称(中文)：
+                    </th>
+                    <td>
+                        <input type="text" name="Comment" id="Comment" class="mytext" value="@Model.Comment" style="width: 75%" />
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        抽取类型：
+                    </th>
+                    <td>
+                        <select id="ExtractType" class="myselect" name="ExtractType">
+                            <option value="Manual" @(Model.ExtractType ? "" : "selected")>手动抽取</option>
+                            <option value="Auto" @(Model.ExtractType ? "selected" : "")>自动抽取</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        运行时间：
+                    </th>
+                    <td>
+                        <input type="text" name="RunTime" id="RunTime" class="mytext" value="@Model.RunTime" placeholder="月日时分秒" style="width: 200px;" />&nbsp;
+                        Ex: * * * 01 00 每时01分00秒
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        抽取方式：
+                    </th>
+                    <td>
+                        <input type="radio" name="OnlyIncrement" class="mytext" value="OnlyIncrement" @(Model.OnlyIncrement ? "checked" : "") />只有增分&nbsp;&nbsp;
+                        <input type="radio" name="OnlyIncrement" class="mytext" value="All" @(Model.OnlyIncrement ? "" : "checked") />全部
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="div_data" title="数据连接">
+            <div style="height:8px;"></div>
+            <table cellpadding="0" cellspacing="1" border="0" width="99%" class="formtable">
+                <tr>
+                    <th style="width: 80px;">
+                        数据连接：
+                    </th>
+                    <td>
+                        <select id="DBConnID" name="DBConnID" class="myselect" onchange="conn_db_change(this)">
+                            <option value=""></option>@Html.Raw(link_DBConnOptions)
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        数据表：
+                    </th>
+                    <td>
+                        <select id="db_table" name="db_table" class="myselect" onchange="conn_table_change(this)" style="width:120px;"></select>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        主键：
+                    </th>
+                    <td>
+                        <select id="db_primarykey" name="db_primarykey" class="myselect" onchange="" style="width:120px;"></select>
+                    </td>
+                </tr>
+            </table>
+            <div style="height:8px;"></div>
+            <table cellpadding="0" cellspacing="1" border="0" width="99%" style="width:99%" class="listtable" id="link_listtable">
+                <thead>
+                    <tr>
+                        <th style="width:70%">字段</th>
+                        <th><a href="javascript:link_add();"><img alt="" src="@Url.Content("~/images/ico/add.gif")" style="border:0; vertical-align:middle;" /><span style="vertical-align:middle;">添加</span></a></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+    </div>
+    <div style="width:99%; margin:8px auto 0 auto; text-align:center;">
+        <input type="submit" class="mybutton" value=" 确 定 " />
+        <input type="button" class="mybutton" value=" 取 消 " onclick="closewin();" />
+    </div>
+</form>
+<script type="text/javascript">
+    var isAdd = '1' == '@Request.QueryString["isadd"]';
+    var openerid = '@Request.QueryString["openerid"]';
+    var win = new BPUI.Window();
+    var rootdir = '@Url.Content("~/")';
+    var json = '(@Html.Raw(Model.DesignJSON))';  //to initialize
+
+    $(function () {
+        new BPUI.Tab({ id: "tabdiv", replace: true, contextmenu: false });
+
+        if (!isAdd) {
+            if ($("#DBConnID").val() && json.length) {
+                json = eval(json);
+                //table
+                tableOptions = get_tables($("#DBConnID").val(), json.table);
+                $("#db_table").html(tableOptions);
+                //primary key
+                fieldOptions = get_fields($("#DBConnID").val(), json.table, json.primarykey);
+                $("#db_primarykey").html(fieldOptions);
+                //fields
+                var tr = '';
+                for (index = 1; index <= json.fields.length; index++) {
+                    fieldOptions = get_fields($("#DBConnID").val(), json.table, json.fields[index - 1].field);
+                    tr += '<tr>';
+                    tr += '<td style="background:#ffffff; height:30px;">';
+                    tr += '<input type="hidden" name="link_index" value="' + index.toString() + '"/>';
+                    tr += '<select class="myselect" style="width:220px" id="link_field_' + index.toString() + '" name="link_field[]">' + fieldOptions + '</select></td>';
+                    tr += '<td style="background:#ffffff;"><a href="javascript:link_delete(' + index.toString() + ');" class="deletelink">删除</a></td>';
+                    tr += '</tr>';
+                }
+                $("#link_listtable tbody").append(tr);
+            }
+        }
+
+        if ($("#ExtractType").val() == 'Manual') {
+            $("#RunTime").attr('disabled', 'disabled');
+        }
+        $("#ExtractType").change(function () {
+            if ($(this).val() == 'Auto') {
+                $("#RunTime").removeAttr('disabled');
+            } else {
+                $("#RunTime").attr('disabled', 'disabled');
+            }
+        });
+
+    });
+
+    function conn_db_change(obj) {
+        if (!obj || !obj.value) return;
+        tableOptions = get_tables(obj.value);
+        $("#db_table").html(tableOptions);
+        conn_table_change($("#db_table")[0]);
+    }
+
+    function conn_table_change(obj) {
+        if (!$("#DBConnID").val() || !obj || !obj.value) {
+            $("#db_primarykey").html("");
+            $("#link_listtable tbody tr select").each(function () {
+                $(this).html("");
+            });
+            return;
+        }
+        fieldOptions = get_fields($("#DBConnID").val(), obj.value);
+        $("#db_primarykey").html(fieldOptions);
+        $("#link_listtable tbody tr select").each(function () {
+            $(this).html(fieldOptions);
+        });
+    }
+
+    function get_tables(connid, table) {
+        var html = '<option value=""></option>';
+        $.ajax({
+            url: rootdir + "WorkFlowDesigner/GetTables?connid=" + connid,
+            dataType: 'json',
+            async: false,
+            success: function (tables) {
+                for (var i in tables) {
+                    if (tables[i].name != undefined) {
+                        html += '<option value="' + tables[i].name + '"' + (tables[i].name == table? 'selected="selected"':'') + '>' + tables[i].name + '</option>';
+                    }
+                }
+            }
+        });
+        return html;
+    }
+
+    function get_fields(connid, table, field) {
+        var html = '<option value=""></option>';
+        $.ajax({
+            url: rootdir + "WorkFlowDesigner/GetFields?connid=" + connid + "&table=" + table,
+            dataType: 'json',
+            async: false,
+            success: function (fields) {
+                for (var i in fields) {
+                    if (fields[i].name != undefined) {
+                        if (fields[i].note != undefined && fields[i].note != "") {
+                            html += '<option value="' + fields[i].name + '"' + (fields[i].name == field ? 'selected="selected"' : '') + '>' + fields[i].name + '(' + fields[i].note + ')</option>';
+                        } else {
+                            html += '<option value="' + fields[i].name + '"' + (fields[i].name == field ? 'selected="selected"' : '') + '>' + fields[i].name + '</option>';
+                        }
+                    }
+                }
+            }
+        });
+        return html;
+    }
+
+    function link_add() {
+        var fieldOptions = '';
+        if (!$("#DBConnID").val()) {
+            alert("Please select the database.");
+            return;
+        }
+        if (!$("#db_table").val()) {
+            alert("Please select the table.");
+            return;
+        }
+        db = $("#DBConnID").val();
+        table = $("#db_table").val();
+        if (db && table) {
+            fieldOptions = get_fields(db, table);
+        }
+        var index = $("#link_listtable tbody tr").size() + 1;
+        var tr = '<tr>';
+        tr += '<td style="background:#ffffff; height:30px;">';
+        tr += '<input type="hidden" name="link_index" value="' + index.toString() + '"/>';
+        tr += '<select class="myselect" style="width:220px" id="link_field_' + index.toString() + '" name="link_field[]">' + fieldOptions + '</select></td>';
+        tr += '<td style="background:#ffffff;"><a href="javascript:link_delete(' + index.toString() + ');" class="deletelink">删除</a></td>';
+        tr += '</tr>';
+        $("#link_listtable tbody").append(tr);
+        new BPUI.Select().init($(".myselect", $("#link_listtable tbody")));
+    }
+    function link_delete(index) {
+        $("#link_listtable tbody tr td input[type='hidden']").each(function () {
+            if ($(this).val() == index.toString()) {
+                $(this).parent().parent().remove();
+            }
+        });
+    }
+
+    $(window).load(function () {
+        @Html.Raw(ViewBag.Script)
+    });
+    function closewin() {
+        win.close();
+        return false;
+    }
+</script>

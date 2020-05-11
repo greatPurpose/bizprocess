@@ -1,0 +1,95 @@
+﻿@{
+    BizProcess.Platform.WorkFlowTask bworkFlowTask = new BizProcess.Platform.WorkFlowTask();
+    BizProcess.Platform.WorkFlow bworkFlow = new BizProcess.Platform.WorkFlow();
+}
+@model IEnumerable<BizProcess.Data.Model.WorkFlowTask>
+<form action="" method="post">
+    @Html.AntiForgeryToken()
+    <div class="querybar">
+        <table cellpadding="0" cellspacing="1" border="0" width="100%">
+            <tr>
+                <td>
+                    名称：<input type="text" class="mytext" id="Title" name="Title" value="@ViewBag.title" />
+                    所属流程：<select class="mycombox" style="width:150px;" width1="166" multiple="multiple" id="FlowID" name="FlowID">@Html.Raw(ViewBag.FlowOptions)</select>
+                    发送人：<input type="text" class="mymember" id="SenderID" unit="0" dept="0" station="0" user="1" group="0" more="0" name="SenderID" value="@ViewBag.sender" />
+                    接收时间：<input type="text" class="mycalendar" style="width:90px;" name="Date1" value="@ViewBag.date1" /> 至 <input type="text" style="width:90px;" class="mycalendar" name="Date2" value="@ViewBag.date2" />
+                    处理状态：<select class="mycombox" style="width:150px;" width1="166" id="type" name="type"><option value="0" @(ViewBag.type==0?"selected=\"selected\"":"")>待办处理</option><option value="1" @(ViewBag.type==1?"selected=\"selected\"":"")>已办处理</option></select>
+                    <input type="submit" name="Search" value="&nbsp;&nbsp;查&nbsp;询&nbsp;&nbsp;" class="mybutton" />
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <table class="mygrid">
+        <thead>
+            <tr>
+                <th width="30%">任务标题</th>
+                <th width="10%">流程</th>
+                <th width="10%">步骤</th>
+                <th width="8%">发送人</th>
+                <th width="13%">接收时间</th>
+                <th width="13%">完成时间</th>
+                <th width="8%">状态</th>
+                <th width="8%" sort="0"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var task in Model)
+            {
+                string flowName;
+                string stepName = bworkFlow.GetStepName(task.StepID, task.FlowID, out flowName);
+                string query1 = string.Format("flowid={0}&stepid={1}&instanceid={2}&taskid={3}&groupid={4}&appid={5}&display=1",
+                    task.FlowID, task.StepID, task.InstanceID, task.ID, task.GroupID, Request.QueryString["appid"]
+                    );
+
+                <tr>
+                    <td><a href="javascript:void(0);" onclick="detail('@task.FlowID','@task.GroupID');return false;" class="blue">@task.Title</a></td>
+                    <td>@flowName</td>
+                    <td>@stepName</td>
+                    <td>@task.SenderName</td>
+                    <td>@task.ReceiveTime</td>
+                    <td>@task.CompletedTime1</td>
+                    <td>@bworkFlowTask.GetStatusTitle(task.Status)</td>
+                    <td>
+                        <a class="viewlink" href="javascript:void(0);" onclick="openTask('WorkFlowRun/Index?@Html.Raw(query1)','@task.Title','@task.ID');">查看</a>
+                        @if (task.Status == 2 && bworkFlowTask.HasWithdraw(task.ID))
+                        {
+                            <a style="background:url(@Url.Content("~/Images/ico/arrow_medium_left.png")) no-repeat left center; padding-left:18px;" href="javascript:void(0);" onclick="withdraw('@task.ID');">收回</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div>@Html.Raw(ViewBag.pager)</div>
+</form>
+<script type="text/javascript">
+    $(function ()
+    {
+        var dataGrid = new BPUI.Grid({ table: $(".mygrid") });
+    });
+    function openTask(url, title, id)
+    {
+        top.openApp(url, 0, title, id, 0, 0, false);
+    }
+    function detail(flowid, groupid)
+    {
+        top.mainDialog.open({
+            url: top.rootdir + '/WorkFlowTasks/Detail?flowid1=' + flowid + "&groupid=" + groupid + '@Html.Raw(ViewBag.query)',
+            width: screen.width - 50, height: screen.height - 100, title: "查看流程处理过程"
+        });
+    }
+    function withdraw(taskID)
+    {
+        if (confirm("您真的要收回该任务吗?"))
+        {
+            $.ajax({
+                url: top.rootdir + "/WorkFlowTasks/Withdraw?taskid=" + taskID + '@Html.Raw(ViewBag.query)', cache: false, async: false, success: function (txt)
+            {
+                alert(txt);
+                window.location = window.location;
+            }
+            });
+        }
+    }
+</script>

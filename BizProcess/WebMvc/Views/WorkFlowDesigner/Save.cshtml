@@ -1,0 +1,8 @@
+﻿@{
+    Layout = null;
+    
+    string json = Request.Form["json"];
+    string msg = new BizProcess.Platform.WorkFlow().SaveFlow(json);
+    BizProcess.Platform.Log.Add("保存了流程", json + "(" + msg + ")", BizProcess.Platform.Log.Types.流程相关);
+    Response.Write(msg);
+}

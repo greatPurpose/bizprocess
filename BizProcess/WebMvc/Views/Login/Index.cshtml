@@ -1,0 +1,15 @@
+﻿@{
+    ViewBag.Title = "BizProcess";
+    Page.BodyStyle = "style='background:#f3f7f9; overflow:hidden;'";
+    Page.CheckApp = false;
+}
+<div id="bgdiv" class="loginbgdiv"></div>
+<script type="text/javascript">
+    var win = new BPUI.Window();
+    $(function ()
+    {
+        var left = $(window).width() - 500;
+        var top = $(window).height() - 280;
+        win.open({ url: "Login/Login", width: 300, height: 200, top: top, left: left, showico: false, title: "用户登录", resize: false, ismodal: false, showclose: false });
+    });
+</script>
